@@ -12,6 +12,8 @@ import threading
 class Game:
     def __init__(self, root):
         self.root = root
+        self.boss_i=0
+        self.boss_j=0
         self.room_x=2
         self.room_y=2
         self.canvas_int = tk.Canvas(root, width = 600, height = 150, bg = "grey")
@@ -185,12 +187,21 @@ class Game:
                             else:
                                 chance=0
                         chance=0
+        chance=1
         for i in range(0,5):
                 for j in range(0,5):
                     if self.map[i][j]==0:
                         self.enemy_map[i].append(0)
                     else:
                         self.enemy_map[i].append(1)
+                        if self.map[i][j]!=0 and ((i!=0 and self.map[i-1][j]!=0 and ((i==4 or self.map[i+1][j]==0) and (j==0 or self.map[i][j-1]==0) and (j==4 or self.map[i][j+1]==0)))or(i!=4 and self.map[i+1][j]!=0 and ((i==0 or self.map[i-1][j]==0) and (j==0 or self.map[i][j-1]==0) and (j==4 or self.map[i][j+1]==0)))or(j!=0 and self.map[i][j-1]!=0 and ((i==0 or self.map[i-1][j]==0) and (i==4 or self.map[i+1][j]==0) and (j==4 or self.map[i][j+1]==0)))or(j!=4 and self.map[i][j+1]!=0 and ((i==0 or self.map[i-1][j]==0) and (i==4 or self.map[i+1][j]==0) and (j==0 or self.map[i][j-1]==0)))):
+                            if chance==1:
+                                self.boss_j=j
+                                self.boss_i=i
+                            chance=random.randint(0,1)
+        self.map[self.boss_i][self.boss_j]=6
+        self.enemy_map[self.boss_i][self.boss_j]=0
+
         print(self.map[0])
         print(self.map[1])
         print(self.map[2])
@@ -247,7 +258,7 @@ class Game:
                     self.canvas.delete(wall.rect)
                 self.walls.clear()
                 self.block_door()
-                if self.current_room==1:
+                if self.current_room==1 or self.current_room==6:
                     for wall in self.room1:
                         x1=wall[0]
                         y1=wall[1]
@@ -458,7 +469,7 @@ class Game:
                     Bullet.bullets.clear()
                     self.block_door()
                     self.block_room()
-                    if self.current_room==1:
+                    if self.current_room==1 or self.current_room==6:
                         for wall in self.room1:
                             x1=wall[0]
                             y1=wall[1]
@@ -524,7 +535,7 @@ class Game:
                     Bullet.bullets.clear()
                     self.block_door()
                     self.block_room()
-                    if self.current_room==1:
+                    if self.current_room==1 or self.current_room==6:
                         for wall in self.room1:
                             x1=wall[0]
                             y1=wall[1]
@@ -591,7 +602,7 @@ class Game:
                     Bullet.bullets.clear()
                     self.block_door()
                     self.block_room()
-                    if self.current_room==1:
+                    if self.current_room==1 or self.current_room==6:
                         for wall in self.room1:
                             x1=wall[0]
                             y1=wall[1]
@@ -659,7 +670,7 @@ class Game:
                     Bullet.bullets.clear()
                     self.block_door()
                     self.block_room()
-                    if self.current_room==1:
+                    if self.current_room==1 or self.current_room==6:
                         for wall in self.room1:
                             x1=wall[0]
                             y1=wall[1]
