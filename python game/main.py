@@ -1,4 +1,5 @@
 from enemy import Enemy
+from locks import Lock
 from medic_bag import Medic_bag
 from doors import Door
 from wall import Wall
@@ -41,14 +42,13 @@ class Game:
             [580,15]
         ]
         self.doors=[
-            #2двери
             Door(self.canvas,0,275,5,325),
             Door(self.canvas,598,275,600,325),
             Door(self.canvas,275,0,325,5),
             Door(self.canvas,275,598,325,600),
 
         ]
-        
+        self.locks=[]
 
         self.walls = [
             #края
@@ -455,6 +455,11 @@ class Game:
             x2=self.block_d_door[2]
             y2=self.block_d_door[3]
             self.walls.append(Wall(self.canvas,x1,y1,x2,y2))
+        
+
+
+
+
 
     def block_door(self):
         if self.room_x==4 or self.map[self.room_y][self.room_x+1]==0:
@@ -481,6 +486,30 @@ class Game:
                             x2=self.block_u_door[2]
                             y2=self.block_u_door[3]
                             self.walls.append(Wall(self.canvas,x1,y1,x2,y2))
+        if self.room_x!=4 and self.map[self.room_y][self.room_x+1]==6:
+            x1=595
+            y1=275
+            x2=600
+            y2=325
+            self.locks.append(Lock(self.canvas,x1,y1,x2,y2))
+        if self.room_x!=0 and self.map[self.room_y][self.room_x-1]==6:
+            x1=0
+            y1=275
+            x2=10
+            y2=325
+            self.locks.append(Lock(self.canvas,x1,y1,x2,y2))
+        if self.room_y!=4 and self.map[self.room_y+1][self.room_x]==6:
+            x1=275
+            y1=595
+            x2=325
+            y2=600
+            self.locks.append(Lock(self.canvas,x1,y1,x2,y2))
+        if self.room_y!=0 and self.map[self.room_y-1][self.room_x]==6:
+            x1=275
+            y1=0
+            x2=325
+            y2=10
+            self.locks.append(Lock(self.canvas,x1,y1,x2,y2))
 
 
     def move_player(self, dx, dy):
@@ -775,7 +804,11 @@ class Game:
                 self.medic_bags.remove(medic_bag)
                 self.canvas.delete(medic_bag.rect)
 
-                        
+        for lock in self.locks:
+            lock_coords = self.canvas.coords(lock.rect)
+            if (player_coords[2] > lock_coords[0] and player_coords[0] < lock_coords[2] and
+                player_coords[3] > lock_coords[1] and player_coords[1] < lock_coords[3]):
+                return True            
                
         for wall in self.walls:
             wall_coords = self.canvas.coords(wall.rect)
