@@ -262,6 +262,7 @@ class Game:
                 for j in range(0,5):
                     if self.map[i][j]!=0:
                         self.canvas_int.create_rectangle(30*j, 30*i, 30*(j+1), 30*(i+1), fill = "grey", outline= 'black', width=1)
+        self.canvas_int.create_rectangle(30*self.boss_j, 30*self.boss_i, 30*(self.boss_j+1), 30*(self.boss_i+1), fill = "grey", outline= 'red', width=1)
         self.mini_map=self.canvas_int.create_rectangle(30*self.room_x, 30*self.room_y, 30*(self.room_x+1), 30*(self.room_y+1), fill = "grey", outline= 'green', width=1)
         
 
