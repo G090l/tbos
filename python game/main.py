@@ -13,7 +13,7 @@ class Game:
     def __init__(self, root):
         self.root = root
         self.boss_i=0
-        self.boss_j=0
+        self.boss_j=-1
         self.room_x=2
         self.room_y=2
         self.canvas_int = tk.Canvas(root, width = 600, height = 150, bg = "grey")
@@ -24,6 +24,7 @@ class Game:
         self.health_bar = self.canvas_int.create_text(300, 25, text = f"Здоровье: {self.player.health}", font =("Arial", 14), fill = "black")
 
         self.map = [[],[],[],[],[]]
+        self.range_map = [[],[],[],[],[]]
         self.enemy_map = [[],[],[],[],[]]
 
         self.enemies = [
@@ -135,12 +136,12 @@ class Game:
         ]
 
         self.medic_bags=[]
-
-
         self.root.bind("<KeyPress>", self.key_press)
         self.root.bind("<KeyRelease>", self.key_release)
         self.update_movement()
         self.create_map()
+
+
 
     def create_map(self):
         room_counter=0
@@ -149,7 +150,6 @@ class Game:
             for j in range(0,5):
                 self.map[i].append(0)
         self.map[2][2]=1
-        print(self.map)
         while room_counter <=8 :
             for i in range(0,5):
                 for j in range(0,5):
@@ -188,29 +188,73 @@ class Game:
                                 chance=0
                         chance=0
         chance=1
+
         for i in range(0,5):
+            for j in range(0,5):
+                self.range_map[j].append(0)
+        for i in range(0,5):
+            for j in range(0,5):
+                if self.map[i][j]!=0:
+                     self.range_map[i][j]=1
+        self.range_map[2][2]=2
+        k=2
+        e=1
+        while e!=0:
+            e=0
+            for i in range(0,5):
                 for j in range(0,5):
-                    if self.map[i][j]==0:
-                        self.enemy_map[i].append(0)
-                    else:
-                        self.enemy_map[i].append(1)
-                        if self.map[i][j]!=0 and ((i!=0 and self.map[i-1][j]!=0 and ((i==4 or self.map[i+1][j]==0) and (j==0 or self.map[i][j-1]==0) and (j==4 or self.map[i][j+1]==0)))or(i!=4 and self.map[i+1][j]!=0 and ((i==0 or self.map[i-1][j]==0) and (j==0 or self.map[i][j-1]==0) and (j==4 or self.map[i][j+1]==0)))or(j!=0 and self.map[i][j-1]!=0 and ((i==0 or self.map[i-1][j]==0) and (i==4 or self.map[i+1][j]==0) and (j==4 or self.map[i][j+1]==0)))or(j!=4 and self.map[i][j+1]!=0 and ((i==0 or self.map[i-1][j]==0) and (i==4 or self.map[i+1][j]==0) and (j==0 or self.map[i][j-1]==0)))):
-                            if chance==1:
-                                self.boss_j=j
-                                self.boss_i=i
-                            chance=random.randint(0,1)
+                    if self.range_map[i][j]==k:
+                        if j!=4 and self.range_map[i][j+1]==1:
+                            self.range_map[i][j+1]=(k+1)
+                            e=1
+                        if j!=0 and self.range_map[i][j-1]==1:
+                            self.range_map[i][j-1]=(k+1)
+                            e=1
+                        if i!=4 and self.range_map[i+1][j]==1:
+                            self.range_map[i+1][j]=(k+1)
+                            e=1
+                        if i!=0 and self.range_map[i-1][j]==1:
+                            self.range_map[i-1][j]=(k+1)
+                            e=1
+            print(k)
+            k=k+1
+
+        print(self.range_map[0])
+        print(self.range_map[1])
+        print(self.range_map[2])
+        print(self.range_map[3])
+        print(self.range_map[4])
+        print()
+
+        while self.boss_j==-1:
+            for i in range(0,5):
+                    for j in range(0,5):
+                        if self.map[i][j]==0:
+                            self.enemy_map[i].append(0)
+                        else:
+                            self.enemy_map[i].append(1)
+                            if self.range_map[i][j]==k and ((i!=0 and self.map[i-1][j]!=0 and ((i==4 or self.map[i+1][j]==0) and (j==0 or self.map[i][j-1]==0) and (j==4 or self.map[i][j+1]==0)))or(i!=4 and self.map[i+1][j]!=0 and ((i==0 or self.map[i-1][j]==0) and (j==0 or self.map[i][j-1]==0) and (j==4 or self.map[i][j+1]==0)))or(j!=0 and self.map[i][j-1]!=0 and ((i==0 or self.map[i-1][j]==0) and (i==4 or self.map[i+1][j]==0) and (j==4 or self.map[i][j+1]==0)))or(j!=4 and self.map[i][j+1]!=0 and ((i==0 or self.map[i-1][j]==0) and (i==4 or self.map[i+1][j]==0) and (j==0 or self.map[i][j-1]==0)))):
+                                if chance==1:
+                                    self.boss_j=j
+                                    self.boss_i=i
+                                chance=random.randint(0,1)
+            k=k-1
         self.map[self.boss_i][self.boss_j]=6
         self.enemy_map[self.boss_i][self.boss_j]=0
+            
 
         print(self.map[0])
         print(self.map[1])
         print(self.map[2])
         print(self.map[3])
         print(self.map[4])
+
         self.current_room=self.map[self.room_y][self.room_x]
         self.block_door()
         self.create_mini_map()
         self.block_room()
+
+
 
     def create_mini_map(self):
         self.canvas_int.create_rectangle(0, 0, 150, 150, fill = "black", outline= 'black', width=1)
