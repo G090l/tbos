@@ -6,6 +6,7 @@ from wall import Wall
 from player import Player
 from bullet import Bullet
 from shooting_enemy import Shooting_Enemy
+from golden_key import Golden_key
 import random
 import tkinter as tk
 import threading
@@ -13,6 +14,8 @@ import threading
 class Game:
     def __init__(self, root):
         self.root = root
+        self.golden_key_j=-1
+        self.golden_key_i=-1
         self.boss_i=0
         self.boss_j=-1
         self.room_x=2
@@ -136,6 +139,7 @@ class Game:
         ]
 
         self.medic_bags=[]
+        self.golden_keys=[]
         self.root.bind("<KeyPress>", self.key_press)
         self.root.bind("<KeyRelease>", self.key_release)
         self.update_movement()
@@ -195,7 +199,7 @@ class Game:
         for i in range(0,5):
             for j in range(0,5):
                 if self.map[i][j]!=0:
-                     self.range_map[i][j]=1
+                    self.range_map[i][j]=1
         self.range_map[2][2]=2
         k=2
         e=1
@@ -240,9 +244,22 @@ class Game:
                                 chance=random.randint(0,1)
             k=k-1
         self.map[self.boss_i][self.boss_j]=6
+        chance=1
+        for i in range(0,5):
+                    for j in range(0,5):
+                        if self.map[i][j]!=0 and self.map[i][j]!=6 and (i!=2 and i!=2):
+                            if chance==1:
+                                    self.golden_key_j=j
+                                    self.golden_key_i=i
+                            chance=random.randint(0,1)
+        print(self.golden_key_j)
+        print(self.golden_key_i)
+        print()
+        print(self.boss_j)
+        print(self.boss_i)
+
         self.enemy_map[self.boss_i][self.boss_j]=0
             
-
         print(self.map[0])
         print(self.map[1])
         print(self.map[2])
@@ -529,6 +546,8 @@ class Game:
                     self.move_player(560,0)
                     self.room_x=self.room_x-1
                     self.current_room=self.map[self.room_y][self.room_x]
+                    for lock in self.locks:
+                        self.canvas.delete(lock.rect)
                     for wall in self.walls:
                         self.canvas.delete(wall.rect)
                     for medic_bag in self.medic_bags:
@@ -537,12 +556,19 @@ class Game:
                         self.canvas.delete(bullet.oval)
                     for enemy in self.enemies:
                         self.canvas.delete(enemy.rect)
+                    self.locks.clear()
                     self.walls.clear()
                     self.enemies.clear()
                     self.medic_bags.clear()
                     Bullet.bullets.clear()
                     self.block_door()
                     self.block_room()
+                    if self.room_y==self.golden_key_i and self.room_x==self.golden_key_j and self.player.golden_key==0:
+                        self.golden_keys.append(Golden_key(self.canvas,300,300))
+                    else:
+                        for golden_key in self.golden_keys:
+                            self.canvas.delete(golden_key.rect)
+                        self.golden_keys.clear()
                     if self.current_room==1 or self.current_room==6:
                         for wall in self.room1:
                             x1=wall[0]
@@ -595,6 +621,8 @@ class Game:
                     self.move_player( -560,0)
                     self.room_x=self.room_x+1
                     self.current_room=self.map[self.room_y][self.room_x]
+                    for lock in self.locks:
+                        self.canvas.delete(lock.rect)
                     for wall in self.walls:
                         self.canvas.delete(wall.rect)
                     for medic_bag in self.medic_bags:
@@ -606,9 +634,16 @@ class Game:
                     self.walls.clear()
                     self.enemies.clear()
                     self.medic_bags.clear()
+                    self.locks.clear()
                     Bullet.bullets.clear()
                     self.block_door()
                     self.block_room()
+                    if self.room_y==self.golden_key_i and self.room_x==self.golden_key_j and self.player.golden_key==0:
+                        self.golden_keys.append(Golden_key(self.canvas,300,300))
+                    else:
+                        for golden_key in self.golden_keys:
+                            self.canvas.delete(golden_key.rect)
+                        self.golden_keys.clear()
                     if self.current_room==1 or self.current_room==6:
                         for wall in self.room1:
                             x1=wall[0]
@@ -662,6 +697,8 @@ class Game:
                     self.move_player( 0,560)
                     self.room_y=self.room_y-1
                     self.current_room=self.map[self.room_y][self.room_x]
+                    for lock in self.locks:
+                        self.canvas.delete(lock.rect)
                     for wall in self.walls:
                         self.canvas.delete(wall.rect)
                     for medic_bag in self.medic_bags:
@@ -672,10 +709,17 @@ class Game:
                         self.canvas.delete(enemy.rect)
                     self.walls.clear()
                     self.enemies.clear()
+                    self.locks.clear()
                     self.medic_bags.clear()
                     Bullet.bullets.clear()
                     self.block_door()
                     self.block_room()
+                    if self.room_y==self.golden_key_i and self.room_x==self.golden_key_j and self.player.golden_key==0:
+                        self.golden_keys.append(Golden_key(self.canvas,300,300))
+                    else:
+                        for golden_key in self.golden_keys:
+                            self.canvas.delete(golden_key.rect)
+                        self.golden_keys.clear()
                     if self.current_room==1 or self.current_room==6:
                         for wall in self.room1:
                             x1=wall[0]
@@ -730,6 +774,8 @@ class Game:
                     self.move_player( 0,-560)
                     self.room_y=self.room_y+1
                     self.current_room=self.map[self.room_y][self.room_x]
+                    for lock in self.locks:
+                        self.canvas.delete(lock.rect)
                     for wall in self.walls:
                         self.canvas.delete(wall.rect)
                     for medic_bag in self.medic_bags:
@@ -740,10 +786,17 @@ class Game:
                         self.canvas.delete(enemy.rect)
                     self.walls.clear()
                     self.enemies.clear()
+                    self.locks.clear() 
                     self.medic_bags.clear()
                     Bullet.bullets.clear()
                     self.block_door()
                     self.block_room()
+                    if self.room_y==self.golden_key_i and self.room_x==self.golden_key_j and self.player.golden_key==0:
+                        self.golden_keys.append(Golden_key(self.canvas,300,300))
+                    else:
+                        for golden_key in self.golden_keys:
+                            self.canvas.delete(golden_key.rect)
+                        self.golden_keys.clear()
                     if self.current_room==1 or self.current_room==6:
                         for wall in self.room1:
                             x1=wall[0]
@@ -795,6 +848,14 @@ class Game:
         self.update_room()
         player_coords = self.canvas.coords(self.player.rect)
         
+        for golden_key in self.golden_keys:
+            golden_key_coords=self.canvas.coords(golden_key.rect)    
+            if (player_coords[2] > golden_key_coords[0] and player_coords[0] < golden_key_coords[2] and
+                player_coords[3] > golden_key_coords[1] and player_coords[1] < golden_key_coords[3]):
+                self.player.golden_key=1
+                self.golden_keys.remove(golden_key)
+                self.canvas.delete(golden_key.rect)  
+        
         for medic_bag in self.medic_bags:
             medic_bag_coords = self.canvas.coords(medic_bag.rect)
             if (player_coords[2] > medic_bag_coords[0] and player_coords[0] < medic_bag_coords[2] and
@@ -807,8 +868,11 @@ class Game:
         for lock in self.locks:
             lock_coords = self.canvas.coords(lock.rect)
             if (player_coords[2] > lock_coords[0] and player_coords[0] < lock_coords[2] and
-                player_coords[3] > lock_coords[1] and player_coords[1] < lock_coords[3]):
-                return True            
+                player_coords[3] > lock_coords[1] and player_coords[1] < lock_coords[3]) and self.player.golden_key==0:
+                return True
+            elif (player_coords[2] > lock_coords[0] and player_coords[0] < lock_coords[2] and
+                player_coords[3] > lock_coords[1] and player_coords[1] < lock_coords[3]) and self.player.golden_key==1:
+                return False
                
         for wall in self.walls:
             wall_coords = self.canvas.coords(wall.rect)
@@ -816,14 +880,10 @@ class Game:
                 player_coords[3] > wall_coords[1] and player_coords[1] < wall_coords[3]):
                 return True
         return False
-
     
-    
-
     def check_bullet_collision(self):
         player_coords = self.canvas.coords(self.player.rect)
         
-        #print(len(Bullet.bullets))
         for bullet in Bullet.bullets[:]:
             bullet_coords = self.canvas.coords(bullet.oval)
             if (player_coords[2] > bullet_coords[0] and player_coords[0] < bullet_coords[2] and player_coords[3] > bullet_coords[1] and player_coords[1] < bullet_coords[3]):
@@ -841,7 +901,7 @@ class Game:
                     if len(Bullet.bullets)!=0:
                         Bullet.bullets.remove(bullet)
                     self.canvas.delete(bullet.oval)
-        #self.root.after(50, self.check_bullet_collision)
+
     def game_over(self):
         self.canvas_int.create_text(300, 50, text = "ПОТРАЧЕНО", font =("Arial", 30), fill ="red")
         for medic_bag in self.medic_bags:
