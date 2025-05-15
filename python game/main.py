@@ -30,14 +30,9 @@ class Game:
         self.map = [[],[],[],[],[]]
         self.range_map = [[],[],[],[],[]]
         self.enemy_map = [[],[],[],[],[]]
-
-        self.enemies = [
-
-            Enemy(self.canvas, 15, 15),
-            Enemy(self.canvas, 580, 580),
-            Enemy(self.canvas, 15, 580),
-            Enemy(self.canvas, 580, 15)
-        ]
+        self.enemies = []
+        self.snake_boss = []
+        self.snake_boss_room=[[300,300]]
         self.enemy_room=[
             [15,15],
             [580,580],
@@ -258,7 +253,7 @@ class Game:
         print(self.boss_j)
         print(self.boss_i)
 
-        self.enemy_map[self.boss_i][self.boss_j]=0
+        self.enemy_map[self.boss_i][self.boss_j]=2
             
         print(self.map[0])
         print(self.map[1])
@@ -314,7 +309,7 @@ class Game:
                 self.use_sword(player_coords[0]-20,player_coords[1],player_coords[2]-20,player_coords[3])
             elif key == "right":
                 self.use_sword(player_coords[0]+20,player_coords[1],player_coords[2]+20,player_coords[3])
-            if len(self.enemies)==0:
+            if len(self.enemies)==0 and len(self.snake_boss)==0:
                 self.enemy_map[self.room_y][self.room_x]=0
                 for wall in self.walls:
                     self.canvas.delete(wall.rect)
@@ -357,10 +352,11 @@ class Game:
                         self.walls.append(Wall(self.canvas,x1,y1,x2,y2))
 
         self.enemy_chase()
+        self.snake_boss_chase()
         self.root.after(16, self.update_movement)
         self.check_enemy_collision()
-        self.check_bullet_collision()
-        
+        self.check_snake_collision()
+        self.check_bullet_collision() 
 
     def enemy_chase(self):
         player_coords = self.canvas.coords(self.player.rect)
@@ -375,8 +371,6 @@ class Game:
             elif player_coords[0]>enemy_coords[0]:
                 enemy.dx=3
                 enemy.ddx=player_coords[0]-enemy_coords[0]
-
-
             if player_coords[1]==enemy_coords[1]:
                 enemy.dy=0
                 enemy.ddy=0
@@ -386,11 +380,52 @@ class Game:
             elif player_coords[1]>enemy_coords[1]:
                 enemy.dy=3
                 enemy.ddy=player_coords[1]-enemy_coords[1]
-
-
-
-
     
+    def snake_boss_chase(self):
+        if len(self.snake_boss)!=0:
+            player_coords = self.canvas.coords(self.player.rect)
+            snake_head1_coords = self.canvas.coords(self.snake_boss[0].rect)
+            if player_coords[0]==snake_head1_coords[0]:
+                self.snake_boss[0].dx=0
+                self.snake_boss[0].ddx=0
+            elif player_coords[0]<snake_head1_coords[0]:
+                self.snake_boss[0].dx=-3
+                self.snake_boss[0].ddx=player_coords[0]-snake_head1_coords[0]
+            elif player_coords[0]>snake_head1_coords[0]:
+                self.snake_boss[0].dx=3
+                self.snake_boss[0].ddx=player_coords[0]-snake_head1_coords[0]
+            if player_coords[1]==snake_head1_coords[1]:
+                self.snake_boss[0].dy=0
+                self.snake_boss[0].ddy=0
+            elif player_coords[1]<snake_head1_coords[1]:
+                self.snake_boss[0].dy=-3
+                self.snake_boss[0].ddy=player_coords[1]-snake_head1_coords[1]
+            elif player_coords[1]>snake_head1_coords[1]:
+                self.snake_boss[0].dy=3
+                self.snake_boss[0].ddy=player_coords[1]-snake_head1_coords[1]
+
+            for i in range(1,(len(self.snake_boss))) :
+                snake_head_coords=self.canvas.coords(self.snake_boss[i-1].rect)
+                snake_body_coords=self.canvas.coords(self.snake_boss[i].rect)
+                if snake_head_coords[0]==snake_body_coords[0]:
+                    self.snake_boss[i].dx=0
+                    self.snake_boss[i].ddx=0
+                elif snake_head_coords[0]<snake_body_coords[0]:
+                    self.snake_boss[i].dx=-3
+                    self.snake_boss[i].ddx=snake_head_coords[0]-snake_body_coords[0]
+                elif snake_head_coords[0]>snake_body_coords[0]:
+                    self.snake_boss[i].dx=3
+                    self.snake_boss[i].ddx=snake_head_coords[0]-snake_body_coords[0]
+                if snake_head_coords[1]==snake_body_coords[1]:
+                    self.snake_boss[i].dy=0
+                    self.snake_boss[i].ddy=0
+                elif snake_head_coords[1]<snake_body_coords[1]:
+                    self.snake_boss[i].dy=-3
+                    self.snake_boss[i].ddy=snake_head_coords[1]-snake_body_coords[1]
+                elif snake_head_coords[1]>snake_body_coords[1]:
+                    self.snake_boss[i].dy=3
+                    self.snake_boss[i].ddy=snake_head_coords[1]-snake_body_coords[1]
+
     def check_enemy_collision(self):
         player_coords = self.canvas.coords(self.player.rect)
         for enemy in self.enemies:
@@ -399,29 +434,44 @@ class Game:
                 wall_coords = self.canvas.coords(wall.rect)
                 if (enemy_coords[2] > wall_coords[0] and enemy_coords[0] < wall_coords[2] and
                     enemy_coords[3] > wall_coords[1] and enemy_coords[1] < wall_coords[3]):
-                    #print('враг ударился')
                     if enemy_coords[0] < wall_coords[0]:
                         enemy.dx-=7
-                        
                     if enemy_coords[1] > wall_coords[1]:
                         enemy.dy+=7
-                        
                     if enemy_coords[2] > wall_coords[2]:
                         enemy.dx+=7
-                        
                     if enemy_coords[3] < wall_coords[3]:
                         enemy.dy-=7
-                        
-                    
-                    
-                    
                 if (player_coords[2] > enemy_coords[0] and player_coords[0] < enemy_coords[2] and player_coords[3] > enemy_coords[1] and player_coords[1] < enemy_coords[3]):
                     self.player.health -= 0.1
                     self.canvas_int.itemconfig(self.health_bar, text = f"Здоровье: {int(self.player.health)}")
                     if self.player.health <= 0:
                         self.canvas_int.itemconfig(self.health_bar, text = f"Здоровье: 0")
                         self.game_over()
-
+    
+    def check_snake_collision(self):
+        player_coords = self.canvas.coords(self.player.rect)
+        for wall in self.walls:
+                wall_coords = self.canvas.coords(wall.rect)
+                for snake_boss in self.snake_boss:
+                    snake_boss_coords = self.canvas.coords(snake_boss.rect)     
+                    if (snake_boss_coords[2] > wall_coords[0] and snake_boss_coords[0] < wall_coords[2] and
+                            snake_boss_coords[3] > wall_coords[1] and snake_boss_coords[1] < wall_coords[3]):
+                            if snake_boss_coords[0] < wall_coords[0]:
+                                snake_boss.dx-=7
+                            if snake_boss_coords[1] > wall_coords[1]:
+                                snake_boss.dy+=7
+                            if snake_boss_coords[2] > wall_coords[2]:
+                                snake_boss.dx+=7
+                            if snake_boss_coords[3] < wall_coords[3]:
+                               snake_boss.dy-=7
+                
+                    if (player_coords[2] > snake_boss_coords[0] and player_coords[0] < snake_boss_coords[2] and player_coords[3] > snake_boss_coords[1] and player_coords[1] < snake_boss_coords[3]):
+                        self.player.health -= 0.1
+                        self.canvas_int.itemconfig(self.health_bar, text = f"Здоровье: {int(self.player.health)}")
+                        if self.player.health <= 0:
+                            self.canvas_int.itemconfig(self.health_bar, text = f"Здоровье: 0")
+                            self.game_over()
 
     def use_sword(self, x1, y1,x2,y2):
         sword=self.canvas.create_rectangle(x1, y1, x2, y2, fill = "blue", outline= 'grey', width=0)
@@ -444,14 +494,34 @@ class Game:
                     
                 elif enemy_coords[3] < y2:
                     enemy.health-=1
+
+        for enemy in self.snake_boss:
+            enemy_coords = self.canvas.coords(enemy.rect)
+            if enemy.health==0:
+                self.medic_bags.append(Medic_bag(self.canvas,enemy_coords[0]+5,enemy_coords[1]+5))
+                self.snake_boss.remove(enemy)
+                self.canvas.delete(enemy.rect)
+            if (enemy_coords[2] > x1 and enemy_coords[0] < x2 and
+                enemy_coords[3] > y1 and enemy_coords[1] < y2):
+                if enemy_coords[0] < x1:
+                    enemy.health-=1
                     
+                elif enemy_coords[1] > y1:
+                    enemy.health-=1
+                    
+                elif enemy_coords[2] > x2:
+                    enemy.health-=1
+                    
+                elif enemy_coords[3] < y2:
+                    enemy.health-=1
+
         def del_sword():
                 self.canvas.delete(sword)
         timer = threading.Timer(0.01, del_sword)
         timer.start()
 
     def block_room(self):
-        if self.enemy_map[self.room_y][self.room_x]==1:
+        if self.enemy_map[self.room_y][self.room_x]==1 or self.enemy_map[self.room_y][self.room_x]==2:
             x1=self.block_r_door[0]
             y1=self.block_r_door[1]
             x2=self.block_r_door[2]
@@ -472,11 +542,6 @@ class Game:
             x2=self.block_d_door[2]
             y2=self.block_d_door[3]
             self.walls.append(Wall(self.canvas,x1,y1,x2,y2))
-        
-
-
-
-
 
     def block_door(self):
         if self.room_x==4 or self.map[self.room_y][self.room_x+1]==0:
@@ -504,7 +569,7 @@ class Game:
                             y2=self.block_u_door[3]
                             self.walls.append(Wall(self.canvas,x1,y1,x2,y2))
         if self.room_x!=4 and self.map[self.room_y][self.room_x+1]==6:
-            x1=595
+            x1=593
             y1=275
             x2=600
             y2=325
@@ -512,12 +577,12 @@ class Game:
         if self.room_x!=0 and self.map[self.room_y][self.room_x-1]==6:
             x1=0
             y1=275
-            x2=10
+            x2=9
             y2=325
             self.locks.append(Lock(self.canvas,x1,y1,x2,y2))
         if self.room_y!=4 and self.map[self.room_y+1][self.room_x]==6:
             x1=275
-            y1=595
+            y1=593
             x2=325
             y2=600
             self.locks.append(Lock(self.canvas,x1,y1,x2,y2))
@@ -525,9 +590,8 @@ class Game:
             x1=275
             y1=0
             x2=325
-            y2=10
+            y2=8
             self.locks.append(Lock(self.canvas,x1,y1,x2,y2))
-
 
     def move_player(self, dx, dy):
         self.canvas.move(self.player.rect, dx, dy)
@@ -569,7 +633,7 @@ class Game:
                         for golden_key in self.golden_keys:
                             self.canvas.delete(golden_key.rect)
                         self.golden_keys.clear()
-                    if self.current_room==1 or self.current_room==6:
+                    if self.current_room==1:
                         for wall in self.room1:
                             x1=wall[0]
                             y1=wall[1]
@@ -604,6 +668,13 @@ class Game:
                             x2=wall[2]
                             y2=wall[3]
                             self.walls.append(Wall(self.canvas,x1,y1,x2,y2))
+                    elif self.current_room==6:
+                        for wall in self.room1:
+                            x1=wall[0]
+                            y1=wall[1]
+                            x2=wall[2]
+                            y2=wall[3]
+                            self.walls.append(Wall(self.canvas,x1,y1,x2,y2))
                     if self.enemy_map[self.room_y][self.room_x]==1:
                         for enemy in self.enemy_room:
                             x=enemy[0]
@@ -613,6 +684,13 @@ class Game:
                                 self.enemies.append(Enemy(self.canvas,x,y))
                             else:
                                 self.enemies.append(Shooting_Enemy(self.canvas,x,y))
+                    if self.enemy_map[self.room_y][self.room_x]==2:
+                        self.block_room()
+                        for snake_boss in self.snake_boss_room:
+                            x=snake_boss[0]
+                            y=snake_boss[1]
+                            for i in range(150):
+                                self.snake_boss.append(Enemy(self.canvas,x,y))
                     self.canvas_int.delete(self.mini_map)
                     self.mini_map=self.canvas_int.create_rectangle(30*self.room_x, 30*self.room_y, 30*(self.room_x+1), 30*(self.room_y+1), fill = "grey", outline= 'green', width=1)   
                     #правая
@@ -679,6 +757,13 @@ class Game:
                             x2=wall[2]
                             y2=wall[3]
                             self.walls.append(Wall(self.canvas,x1,y1,x2,y2))
+                    elif self.current_room==6:
+                        for wall in self.room1:
+                            x1=wall[0]
+                            y1=wall[1]
+                            x2=wall[2]
+                            y2=wall[3]
+                            self.walls.append(Wall(self.canvas,x1,y1,x2,y2))
                     if self.enemy_map[self.room_y][self.room_x]==1:
                         for enemy in self.enemy_room:
                             x=enemy[0]
@@ -688,6 +773,13 @@ class Game:
                                 self.enemies.append(Enemy(self.canvas,x,y))
                             else:
                                 self.enemies.append(Shooting_Enemy(self.canvas,x,y))
+                    if self.enemy_map[self.room_y][self.room_x]==2:
+                        self.block_room()
+                        for snake_boss in self.snake_boss_room:
+                            x=snake_boss[0]
+                            y=snake_boss[1]
+                            for i in range(150):
+                                self.snake_boss.append(Enemy(self.canvas,x,y))
                     self.canvas_int.delete(self.mini_map)
                     self.mini_map=self.canvas_int.create_rectangle(30*self.room_x, 30*self.room_y, 30*(self.room_x+1), 30*(self.room_y+1), fill = "grey", outline= 'green', width=1)
 
@@ -755,6 +847,13 @@ class Game:
                             x2=wall[2]
                             y2=wall[3]
                             self.walls.append(Wall(self.canvas,x1,y1,x2,y2))
+                    elif self.current_room==6:
+                        for wall in self.room1:
+                            x1=wall[0]
+                            y1=wall[1]
+                            x2=wall[2]
+                            y2=wall[3]
+                            self.walls.append(Wall(self.canvas,x1,y1,x2,y2))
                     if self.enemy_map[self.room_y][self.room_x]==1:
                         for enemy in self.enemy_room:
                             x=enemy[0]
@@ -764,6 +863,13 @@ class Game:
                                 self.enemies.append(Enemy(self.canvas,x,y))
                             else:
                                 self.enemies.append(Shooting_Enemy(self.canvas,x,y))
+                    if self.enemy_map[self.room_y][self.room_x]==2:
+                        self.block_room()
+                        for snake_boss in self.snake_boss_room:
+                            x=snake_boss[0]
+                            y=snake_boss[1]
+                            for i in range(150):
+                                self.snake_boss.append(Enemy(self.canvas,x,y))
                     self.canvas_int.delete(self.mini_map)
                     self.mini_map=self.canvas_int.create_rectangle(30*self.room_x, 30*self.room_y, 30*(self.room_x+1), 30*(self.room_y+1), fill = "grey", outline= 'green', width=1)
 
@@ -832,6 +938,13 @@ class Game:
                             x2=wall[2]
                             y2=wall[3]
                             self.walls.append(Wall(self.canvas,x1,y1,x2,y2))
+                    elif self.current_room==6:
+                        for wall in self.room1:
+                            x1=wall[0]
+                            y1=wall[1]
+                            x2=wall[2]
+                            y2=wall[3]
+                            self.walls.append(Wall(self.canvas,x1,y1,x2,y2)) 
                     if self.enemy_map[self.room_y][self.room_x]==1:
                         for enemy in self.enemy_room:
                             x=enemy[0]
@@ -841,6 +954,13 @@ class Game:
                                 self.enemies.append(Enemy(self.canvas,x,y))
                             else:
                                 self.enemies.append(Shooting_Enemy(self.canvas,x,y))
+                    if self.enemy_map[self.room_y][self.room_x]==2:
+                        self.block_room()
+                        for snake_boss in self.snake_boss_room:
+                            x=snake_boss[0]
+                            y=snake_boss[1]
+                            for i in range(150):
+                                self.snake_boss.append(Enemy(self.canvas,x,y))
                     self.canvas_int.delete(self.mini_map)
                     self.mini_map=self.canvas_int.create_rectangle(30*self.room_x, 30*self.room_y, 30*(self.room_x+1), 30*(self.room_y+1), fill = "grey", outline= 'green', width=1)
 
@@ -871,7 +991,7 @@ class Game:
                 player_coords[3] > lock_coords[1] and player_coords[1] < lock_coords[3]) and self.player.golden_key==0:
                 return True
             elif (player_coords[2] > lock_coords[0] and player_coords[0] < lock_coords[2] and
-                player_coords[3] > lock_coords[1] and player_coords[1] < lock_coords[3]) and self.player.golden_key==1:
+                player_coords[3] > lock_coords[1] and player_coords[1] < lock_coords[3]) and self.player.golden_key==1 and len(self.enemies)==0:
                 return False
                
         for wall in self.walls:
