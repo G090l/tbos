@@ -24,7 +24,7 @@ class Game:
         self.canvas_int.pack()
         self.canvas =tk.Canvas(root, width = 600, height = 600, bg = "black")
         self.canvas.pack()
-        self.player = Player(self.canvas, 250, 250)
+        self.player = Player(self.canvas, 300, 300)
         self.health_bar = self.canvas_int.create_text(300, 25, text = f"Здоровье: {self.player.health}", font =("Arial", 14), fill = "black")
 
         self.map = [[],[],[],[],[]]
