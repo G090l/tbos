@@ -425,6 +425,27 @@ class Game:
                 elif snake_head_coords[1]>snake_body_coords[1]:
                     self.snake_boss[i].dy=3
                     self.snake_boss[i].ddy=snake_head_coords[1]-snake_body_coords[1]
+                
+                """if abs(snake_head_coords[0]-snake_body_coords[0])>5:
+                    if player_coords[0]==snake_body_coords[0]:
+                        self.snake_boss[0].dx=0
+                        self.snake_boss[0].ddx=0
+                    elif player_coords[0]<snake_body_coords[0]:
+                        self.snake_boss[0].dx=-3
+                        self.snake_boss[0].ddx=player_coords[0]-snake_body_coords[0]
+                    elif player_coords[0]>snake_body_coords[0]:
+                        self.snake_boss[0].dx=3
+                        self.snake_boss[0].ddx=player_coords[0]-snake_body_coords[0]
+                    if player_coords[1]==snake_body_coords[1]:
+                        self.snake_boss[0].dy=0
+                        self.snake_boss[0].ddy=0
+                    elif player_coords[1]<snake_body_coords[1]:
+                        self.snake_boss[0].dy=-3
+                        self.snake_boss[0].ddy=player_coords[1]-snake_body_coords[1]
+                    elif player_coords[1]>snake_body_coords[1]:
+                        self.snake_boss[0].dy=3
+                        self.snake_boss[0].ddy=player_coords[1]-snake_body_coords[1]"""
+
 
     def check_enemy_collision(self):
         player_coords = self.canvas.coords(self.player.rect)
